@@ -1,6 +1,7 @@
 # https://adventofcode.com/2018/day/2
 
 import collections
+import sys
 
 import pytest
 
@@ -72,19 +73,49 @@ def common_chars(s1, s2):
     """Return the string of only the common chars between s1 and s2."""
     return "".join(c1 for c1, c2 in zip(s1, s2) if c1 == c2)
 
+test_ids = [
+    "abcde",
+    "fghij",
+    "klmno",
+    "pqrst",
+    "fguij",
+    "axcye",
+    "wvxyz",
+    ]
+
 def test_find_differ_by_one():
-    ids = [
-        "abcde",
-        "fghij",
-        "klmno",
-        "pqrst",
-        "fguij",
-        "axcye",
-        "wvxyz",
-        ]
-    assert find_differ_by_one(ids) == {"fguij", "fghij"}
-    assert common_chars(*find_differ_by_one(ids)) == "fgij"
+    assert find_differ_by_one(test_ids) == {"fguij", "fghij"}
+    assert common_chars(*find_differ_by_one(test_ids)) == "fgij"
 
 if __name__ == "__main__":
-    ans = common_chars(*find_differ_by_one(puzzle_input()))
-    print(f"Part 2: answer is {ans}")
+    if len(sys.argv) == 1:  # By defaut, run the brute force.
+        ans = common_chars(*find_differ_by_one(puzzle_input()))
+        print(f"Part 2: answer is {ans}")
+
+
+def blank_ones(s):
+    """Produce all the strings from s by blanking one character."""
+    for i in range(len(s)):
+        yield s[:i] + "_" + s[i+1:]
+
+def test_blank_ones():
+    assert list(blank_ones("abcde")) == ["_bcde", "a_cde", "ab_de", "abc_e", "abcd_"]
+
+def find_differ_by_one_fast(ids):
+    blanked = collections.defaultdict(list)
+    for s in ids:
+        for blank in blank_ones(s):
+            blanked[blank].append(s)
+
+    pairs = set(tuple(v) for v in blanked.values() if len(v) == 2)
+    assert len(pairs) == 1
+    pair = set(pairs.pop())
+    return pair
+
+def test_find_differ_by_one_fast():
+    assert find_differ_by_one_fast(test_ids) == {"fguij", "fghij"}
+
+if __name__ == "__main__":
+    if len(sys.argv) == 2 and sys.argv[1] == "fast":
+        ans = common_chars(*find_differ_by_one_fast(puzzle_input()))
+        print(f"Part 2: answer is {ans}")
