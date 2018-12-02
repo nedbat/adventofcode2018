@@ -52,8 +52,8 @@ if __name__ == "__main__":
 def equal_but_one(s1, s2):
     """Are s1 and s2 the same except for one character?"""
     # For our purposes, the lengths are always the same, don't check.
-    same = sum((c1 == c2) for c1, c2 in zip(s1, s2))
-    return same == len(s1) - 1
+    different = sum((c1 != c2) for c1, c2 in zip(s1, s2))
+    return different == 1
 
 @pytest.mark.parametrize("s1, s2, ret", [
     ("abcde", "axcye", False),
@@ -107,10 +107,9 @@ def find_differ_by_one_fast(ids):
         for blank in blank_ones(s):
             blanked[blank].append(s)
 
-    pairs = set(tuple(v) for v in blanked.values() if len(v) == 2)
+    pairs = list(v for v in blanked.values() if len(v) == 2)
     assert len(pairs) == 1
-    pair = set(pairs.pop())
-    return pair
+    return pairs[0]
 
 def test_find_differ_by_one_fast():
     assert find_differ_by_one_fast(test_ids) == {"fguij", "fghij"}
