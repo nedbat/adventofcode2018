@@ -4,7 +4,7 @@ import collections
 from dataclasses import dataclass
 import re
 
-@dataclass
+@dataclass(frozen=True)
 class Claim:
     id: int
     left: int
@@ -46,14 +46,49 @@ def multiply_covered_squares(claims):
 
     return [square for square, claims in grid.items() if claims > 1]
 
+TEST_INPUT = """
+    #1 @ 1,3: 4x4
+    #2 @ 3,1: 4x4
+    #3 @ 5,5: 2x2
+    """
+
 def test_multiply_covered_squares():
-    claims = Claim.parse_all("""
-        #1 @ 1,3: 4x4
-        #2 @ 3,1: 4x4
-        #3 @ 5,5: 2x2
-        """)
+    claims = Claim.parse_all(TEST_INPUT)
     assert len(multiply_covered_squares(claims)) == 4
 
 if __name__ == "__main__":
     ans = len(multiply_covered_squares(puzzle_input()))
     print(f"Part 1: {ans} square inches of fabric are within two or more claims")
+
+
+def unlapped_claims(claims):
+    """Which claims don't overlap with any other?"""
+    # Key is (x,y), value is a list of claims.
+    grid = collections.defaultdict(list)
+    for claim in claims:
+        for square in claim.covered_squares():
+            grid[square].append(claim)
+
+    # A set of candidates for non-overlappedness.
+    ok = set(claims)
+
+    # Any square with more than one claim disqualifies all the claims on that
+    # square.
+    for claims in grid.values():
+        if len(claims) > 1:
+            ok.difference_update(claims)
+
+    return ok
+
+def test_unlapped_claims():
+    claims = Claim.parse_all(TEST_INPUT)
+    unlapped = unlapped_claims(claims)
+    assert len(unlapped) == 1
+    assert unlapped.pop().id == 3
+
+
+if __name__ == "__main__":
+    unlapped = unlapped_claims(puzzle_input())
+    assert len(unlapped) == 1
+    ans = unlapped.pop()
+    print(f"Part 2: the only claim that doesn't overlap is #{ans.id}")
