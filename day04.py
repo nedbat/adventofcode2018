@@ -110,3 +110,26 @@ if __name__ == "__main__":
     gid, sleepiest, ans = part1(TEST_INPUT)
     gid, sleepiest, ans = part1(puzzle_input())
     print(f"Part 1: Sleepiest guard is {gid}, sleepiest minute is {sleepiest}: the answer is {ans}")
+
+
+def most_consistent_sleeper(guards):
+    """Find the guard with the single minute with the most occurences.
+    Returns: guard_id, minute_most_slept
+    """
+    # Tally is a sequence of:
+    #   (guard id, minute most slept, times slept that minute)
+    tally = ((gid, *minutes.most_common(1)[0]) for gid, minutes in guards.items())
+    gid, minute_most_slept, times_slept = max(tally, key=lambda gmt: gmt[2])
+    return gid, minute_most_slept
+
+def part2(records):
+    guards = analyze_records(records)
+    gid, minute_most_asleep = most_consistent_sleeper(guards)
+    return gid, minute_most_asleep, gid * minute_most_asleep
+
+def test_part2():
+    assert part2(TEST_INPUT) == (99, 45, 4455)
+
+if __name__ == "__main__":
+    gid, minute_most_asleep, ans = part2(puzzle_input())
+    print(f"Part 2: Most consistent guard is {gid}, sleeping at minute {minute_most_asleep}: the answer is {ans}")
