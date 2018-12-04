@@ -23,39 +23,49 @@ TEST_INPUT = """\
 [1518-11-05 00:55] wakes up
 """.splitlines()
 
-def analyze_records(records):
+def analyze_records(records, show=False):
     # key: guard id, value: counter of minutes
     guards = collections.defaultdict(collections.Counter)
 
     current_gid = None      # Who is on guard
+    current_day = None      # What day is it?
     fell = None             # When did they fall asleep
 
     for record in records:
-        m = re.search(r"(?P<minute>\d\d)] (?:Guard #(?P<id>\d+)|(?P<fall>falls)|(?P<wake>wakes))", record)
+        m = re.search(r"(?P<day>\d\d-\d\d) \d\d:(?P<minute>\d\d)] (?:Guard #(?P<id>\d+)|(?P<fall>falls)|(?P<wake>wakes))", record)
         if not m:
             print(f"Unexpected input: {record!r}")
             continue
-        minute, gid, falls, wakes = m.groups()
+        day, minute, gid, falls, wakes = m.groups()
         if gid is not None:
             # New guard
             assert fell is None
             current_gid = int(gid)
+            current_day = None
         elif falls is not None:
             assert current_gid is not None
             assert fell is None
+            if current_day is None:
+                current_day = day
+            else:
+                assert day == current_day
             fell = int(minute)
         elif wakes is not None:
             assert current_gid is not None
             assert fell is not None
-            for min in range(fell, int(minute)+1):
+            wake = int(minute)
+            for min in range(fell, wake):
                 guards[current_gid][min] += 1
+            if show:
+                xs = ("." * fell) + ("#" * (wake-fell)) + ("." * (60-wake))
+                print(f"{current_day}  {current_gid:5d}  {xs}")
             fell = None
 
     return guards
 
 def most_minutes_asleep(guards):
     """Which guard slept the most, and for how long?"""
-    g_min = ((gid, sum(minutes)) for gid, minutes in guards.items())
+    g_min = ((gid, sum(minutes.values())) for gid, minutes in guards.items())
     return max(g_min, key=lambda gm: gm[1])
 
 def test_minutes_asleep():
@@ -71,12 +81,32 @@ def test_sleepiest_minute():
     gid, minutes = most_minutes_asleep(guards)
     assert sleepiest_minute(guards, gid) == 24
 
+def part1(records):
+    guards = analyze_records(records, show=True)
+    show_guards(guards)
+    gid, minutes = most_minutes_asleep(guards)
+    sleepiest = sleepiest_minute(guards, gid)
+    return gid, sleepiest, gid * sleepiest
+
+def test_part1():
+    assert part1(TEST_INPUT) == (10, 24, 240)
+
 def puzzle_input():
     with open("day04_input.txt") as f:
         return sorted(f.readlines())
 
+chars = ".123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"
+
+def show_guards(guards):
+    for gid in sorted(guards):
+        pic = ""
+        for min in range(60):
+            asleep = guards[gid][min]
+            pic += chars[asleep]
+        total = sum(guards[gid].values())
+        print(f"{gid:4d}  {pic}  {total}")
+
 if __name__ == "__main__":
-    guards = analyze_records(puzzle_input())
-    gid, minutes = most_minutes_asleep(guards)
-    sleepiest = sleepiest_minute(guards, gid)
-    print(f"Part 1: the answer is {gid * sleepiest}")
+    gid, sleepiest, ans = part1(TEST_INPUT)
+    gid, sleepiest, ans = part1(puzzle_input())
+    print(f"Part 1: Sleepiest guard is {gid}, sleepiest minute is {sleepiest}: the answer is {ans}")
