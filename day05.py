@@ -27,3 +27,28 @@ def puzzle_input():
 if __name__ == "__main__":
     result = reduce_pairs(puzzle_input())
     print(f"Part 1: result is {len(result)} units: {result}")
+
+
+def remove_units(s, c):
+    return re.sub(r"(?i)" + c, "", s)
+
+def test_remove_units():
+    assert remove_units("dabAcCaCBAcCcaDA", "a") == "dbcCCBcCcD"
+    assert remove_units("dabAcCaCBAcCcaDA", "b") == "daAcCaCAcCcaDA"
+    assert remove_units("dabAcCaCBAcCcaDA", "c") == "dabAaBAaDA"
+    assert remove_units("dabAcCaCBAcCcaDA", "d") == "abAcCaCBAcCcaA"
+
+def polymers_with_units_removed(polymer):
+    for c in string.ascii_lowercase:
+        yield remove_units(polymer, c)
+
+def best_reduction(polymer):
+    reduced = (reduce_pairs(p) for p in polymers_with_units_removed(polymer))
+    return min(reduced, key=len)
+
+def test_best_reduction():
+    assert best_reduction("dabAcCaCBAcCcaDA") == "daDA"
+
+if __name__ == "__main__":
+    best_reduced = best_reduction(puzzle_input())
+    print(f"Part 2: best reduced is {best_reduced}, length {len(best_reduced)}")
