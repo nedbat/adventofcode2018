@@ -112,7 +112,7 @@ def find_differ_by_one_fast(ids):
     return pairs[0]
 
 def test_find_differ_by_one_fast():
-    assert find_differ_by_one_fast(test_ids) == {"fguij", "fghij"}
+    assert set(find_differ_by_one_fast(test_ids)) == {"fguij", "fghij"}
 
 if __name__ == "__main__":
     if len(sys.argv) == 2 and sys.argv[1] == "fast":

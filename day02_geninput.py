@@ -45,9 +45,10 @@ def generate(length):
         for poss in itertools.combinations(change_places, num_changes):
             yield change_at_many(start, poss)
 
-length = 20
-number = int(sys.argv[1])
+if __name__ == "__main__":
+    length = 20
+    number = int(sys.argv[1])
 
-output = list(itertools.islice(generate(length), number))
-random.shuffle(output)
-print("\n".join(output))
+    output = list(itertools.islice(generate(length), number))
+    random.shuffle(output)
+    print("\n".join(output))
