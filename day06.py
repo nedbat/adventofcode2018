@@ -104,3 +104,18 @@ if __name__ == "__main__":
     grid = map_the_grid(points)
     ans = largest_finite_area(points, grid)
     print(f"Part 1: the largest finite area is {ans}")
+
+
+def map_total_distances(points):
+    grid = {}   # key is point, value is sum of distances.
+
+    for gpt in grid_points(*bounds(points)):
+        grid[gpt] = sum(taxi_dist(gpt, pt) for pt in points)
+
+    return grid
+
+if __name__ == "__main__":
+    points = puzzle_input()
+    grid = map_total_distances(points)
+    ans = sum(1 for dist in grid.values() if dist < 10000)
+    print(f"Part 2: region size is {ans}")
