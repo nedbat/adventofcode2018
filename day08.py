@@ -1,4 +1,6 @@
 # https://adventofcode.com/2018/day/8
+#
+# Simple recursion exercise.
 
 from __future__ import annotations
 
@@ -38,3 +40,22 @@ def puzzle_input():
 if __name__ == "__main__":
     ans = all_metadata(build_tree(puzzle_input()))
     print(f"Part 1: the sum of all metadata is {ans}")
+
+
+def node_value(node):
+    if node.children:
+        value = 0
+        for m in node.metadata:
+            if 1 <= m <= len(node.children):
+                value += node_value(node.children[m-1])
+    else:
+        value = sum(node.metadata)
+    return value
+
+def test_node_value():
+    tree = build_tree(map(int, TEST_INPUT.split()))
+    assert node_value(tree) == 66
+
+if __name__ == "__main__":
+    ans = node_value(build_tree(puzzle_input()))
+    print(f"Part 2: value of the root node is {ans}")
