@@ -68,7 +68,7 @@ if __name__ == "__main__":
     game = Game(*INPUT)
     game.play()
     print(f"Part 1: the winning elf's score is {game.high_score()}")
-    # Part 2 with this code would take hours...
+    # Part 2 with this code took 2h 33m....
 
 class CircleNode:
     __slots__ = ('cw', 'ccw', 'value')
