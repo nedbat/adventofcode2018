@@ -1,6 +1,7 @@
 # https://adventofcode.com/2018/day/10
 
 from dataclasses import dataclass
+import itertools
 import re
 
 @dataclass
@@ -52,15 +53,18 @@ def the_input(fname):
 
 def find_minimal_area(sky):
     last_sky = sky
-    while True:
+    for second in itertools.count():
         sky = last_sky.tick()
         if sky.area() > last_sky.area():
-            return last_sky
+            return last_sky, second
         last_sky = sky
 
-test_sky = Sky(Point.from_line(l) for l in the_input("day10_test_input.txt"))
-find_minimal_area(test_sky).print()
+def results(input_name):
+    sky = Sky(Point.from_line(l) for l in the_input(input_name))
+    message_sky, seconds = find_minimal_area(sky)
+    message_sky.print()
+    print(f"It took {seconds} seconds!")
 
+results("day10_test_input.txt")
 print()
-sky = Sky(Point.from_line(l) for l in the_input("day10_input.txt"))
-find_minimal_area(sky).print()
+results("day10_input.txt")
