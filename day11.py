@@ -13,6 +13,15 @@ class Grid:
         hundreds = (power // 100) % 10
         return hundreds - 5
 
+    def squares(self):
+        for x, y in range2d(1, 300, 1, 300):
+            total = sum(self.power_level(xx, yy) for xx, yy in range2d(x, x+2, y, y+2))
+            yield total, x, y
+
+    def best_square(self):
+        return max(self.squares())
+
+
 @pytest.mark.parametrize("serial_number, x, y, power", [
     (8, 3, 5, 4),
     (57, 122, 79, -5),
@@ -20,27 +29,18 @@ class Grid:
     (71, 101, 153, 4),
 ])
 def test_power_level(serial_number, x, y, power):
-    grid = Grid(serial_number)
-    assert grid.power_level(x, y) == power
+    assert Grid(serial_number).power_level(x, y) == power
 
 
 def range2d(xlo, xhi, ylo, yhi):
     return itertools.product(range(xlo, xhi+1), range(ylo, yhi+1))
-
-def squares(grid):
-    for x, y in range2d(1, 300, 1, 300):
-        total = sum(grid.power_level(xx, yy) for xx, yy in range2d(x, x+2, y, y+2))
-        yield total, x, y
-
-def best_square(grid):
-    return max(squares(grid))
 
 @pytest.mark.parametrize("serial_number, x, y, power", [
     (18, 33, 45, 29),
     (42, 21, 61, 30),
 ])
 def test_best_square(serial_number, x, y, power):
-    assert best_square(Grid(serial_number)) == (power, x, y)
+    assert Grid(serial_number).best_square() == (power, x, y)
 
 INPUT = 5535
 
