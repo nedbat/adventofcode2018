@@ -108,3 +108,23 @@ def test_it():
 
 if __name__ == "__main__":
     print(f"Part 1: the sum is {sum_after(INITIAL_STATE, INPUT, 20)}")
+
+
+def sum_after_with_sliding(initial, rules, gens):
+    """Run the automata, but notice if we reach a steady sliding state."""
+    auto = Automata(rules)
+    p = Plants(initial)
+    for _ in range(gens):
+        nextp = p.next(auto)
+        # Have we slid?
+        if p.state == nextp.state:
+            zoom = gens - nextp.gen
+            last_origin = nextp.origin + (nextp.origin - p.origin) * zoom
+            p = Plants(nextp.state, origin=last_origin, gen=gens)
+            break
+        p = nextp
+    return p.sum()
+
+
+if __name__ == "__main__":
+    print(f"Part 2: the sum is {sum_after_with_sliding(INITIAL_STATE, INPUT, 50_000_000_000)}")
