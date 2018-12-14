@@ -135,9 +135,11 @@ class World:
             c.paint(canvas)
         canvas.print()
   
-    def tick(self):
-        # Put carts in the order they will move
+    def tick(self, remove_crash=False):
+        crashed = []
         for cart in sorted(self.carts.values(), key=lambda c: (c.y, c.x)):
+            if cart in crashed:
+                continue
             # Advance the cart.
             del self.carts[cart.x, cart.y]
             cart.x += cart.dx
@@ -145,7 +147,15 @@ class World:
             pos = (cart.x, cart.y)
             if pos in self.carts:
                 # COLLISION!
-                return cart
+                if remove_crash:
+                    # Moving cart is already out of self.carts. Remove the one
+                    # that is still there.
+                    other = self.carts[pos]
+                    del self.carts[pos]
+                    crashed.append(other)
+                    continue
+                else:
+                    return cart
             self.carts[pos] = cart
 
             # If at an intersection, time to turn and switch tracks (maybe).
@@ -193,7 +203,7 @@ def run_until_crash(input_lines, show=False):
         if result:
             return result
 
-def test_tick():
+def test_run_until_crash():
     crash_cart = run_until_crash(TEST_INPUT, show=True)
     assert (crash_cart.x, crash_cart.y) == (7, 3)
 
@@ -201,3 +211,32 @@ if __name__ == "__main__":
     with open("day13_input.txt") as f:
         crash_cart = run_until_crash(f)
     print(f"Part 1: the first crash is at {crash_cart.x}, {crash_cart.y}")
+
+def run_until_one(input_lines, show=False):
+    world = World()
+    world.read_map(input_lines)
+    while len(world.carts) > 1:
+        if show:
+            world.print()
+            print("-"*80)
+        world.tick(remove_crash=True)
+    return list(world.carts.values())[0]
+
+TEST_INPUT2 = r"""
+/>-<\  
+|   |  
+| /<+-\
+| | | v
+\>+</ |
+  |   ^
+  \<->/
+""".lstrip("\n").splitlines()
+
+def test_run_until_one():
+    last = run_until_one(TEST_INPUT2, show=True)
+    assert (last.x, last.y) == (6, 4)
+
+if __name__ == "__main__":
+    with open("day13_input.txt") as f:
+        last = run_until_one(f)
+    print(f"Part 2: the last cart is at {last.x}, {last.y}")
