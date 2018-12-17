@@ -106,3 +106,47 @@ def part1():
 
 if __name__ == "__main__":
     part1()
+
+def decode_ops():
+    # At first, any opcode could be any operation
+    possibilities = [set(ops) for _ in range(16)]
+
+    # Pass one: what opcodes can be what operations based on the input?
+    for before, inst, after in read_input1():
+        possible = possible_ops(before, inst, after)
+        possibilities[inst[0]] &= possible
+
+    # Pass two: reduce possibilities based on certainties.
+    certains = [None] * 16
+    while any(cert is None for cert in certains):
+        for iop, (cert, possibles) in enumerate(zip(certains, possibilities)):
+            if cert is not None:
+                # We already know this one..
+                continue
+            if len(possibles) == 1:
+                op = possibles.pop()
+                certains[iop] = op
+                for other_poss in possibilities:
+                    if len(other_poss) > 1 and op in other_poss:
+                        other_poss.remove(op)
+
+    return certains
+
+def read_input2():
+    with open("day16_input2.txt") as f:
+        return [list(map(int, line.split())) for line in f]
+
+def run_program(opcodes, instructions):
+    regs = [0, 0, 0, 0]
+    for inst in instructions:
+        regs = run_opcode(opcodes[inst[0]], inst, regs)
+    return regs
+
+def part2():
+    instructions = read_input2()
+    opcodes = decode_ops()
+    regs = run_program(opcodes, instructions)
+    print(f"Part 2: after running the program, register 0 is {regs[0]}")
+
+if __name__ == "__main__":
+    part2()
