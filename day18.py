@@ -36,6 +36,9 @@ class Area:
             for x, ch in enumerate(line.strip()):
                 self.cells[x, y] = ch
 
+    def freeze(self):
+        return tuple(sorted(self.cells.items()))
+
     def tick(self):
         new = {}
         for x, y in self.cells:
@@ -84,19 +87,51 @@ class Area:
         num_lumber = sum(1 for thing in self.cells.values() if thing == LUMBER)
         return num_tree * num_lumber
 
-def run_area(lines, gens):
-    area = Area()
-    area.read(lines)
-    area.print()
-    for _ in range(gens):
+def run_area(area, gens, print_every=1):
+    for gen in range(gens):
         area = area.tick()
-        area.print()
+        if gen % print_every == 0:
+            area.print()
+            print(f"Resource value is {area.resource_value()}")
     return area.resource_value()
 
 def test_area():
-    assert run_area(TEST_INPUT, 10) == 1147
+    area = Area()
+    area.read(TEST_INPUT)
+    assert run_area(area, 10) == 1147
 
 if __name__ == "__main__":
+    area = Area()
     with open("day18_input.txt") as f:
-        ans = run_area(f, 10)
-    print(f"Part 1: the resource value is {ans}")
+        area.read(f)
+    ans = run_area(area, 10)
+    print(f"Part 1: the resource value after 10 steps is {ans}")
+
+def run_with_history(area, gens):
+    history = {area.freeze(): 0}
+    zoomed = False
+    gen = 0
+    while gen < gens:
+        gen += 1
+        area = area.tick()
+        frozen = area.freeze()
+        if zoomed:
+            assert (gen - history[frozen]) % step == 0
+        else:
+            if frozen in history:
+                # We found a loop, we can zoom ahead
+                old = history[frozen]
+                print(f"\nGen {gen} is the same as {old}")
+                step = gen - old
+                nsteps = (gens - gen) // step
+                gen += nsteps * step
+                zoomed = True
+            history[frozen] = gen
+    return area.resource_value()
+
+if __name__ == "__main__":
+    area = Area()
+    with open("day18_input.txt") as f:
+        area.read(f)
+    ans = run_with_history(area, 1_000_000_000)
+    print(f"Part 2: the resource value after a billion steps is {ans}")
