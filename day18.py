@@ -93,18 +93,18 @@ def run_area(area, gens, print_every=1):
         if gen % print_every == 0:
             area.print()
             print(f"Resource value is {area.resource_value()}")
-    return area.resource_value()
+    return area
 
 def test_area():
     area = Area()
     area.read(TEST_INPUT)
-    assert run_area(area, 10) == 1147
+    assert run_area(area, 10).resource_value() == 1147
 
 if __name__ == "__main__":
     area = Area()
     with open("day18_input.txt") as f:
         area.read(f)
-    ans = run_area(area, 10)
+    ans = run_area(area, 10).resource_value()
     print(f"Part 1: the resource value after 10 steps is {ans}")
 
 def run_with_history(area, gens):
@@ -127,11 +127,11 @@ def run_with_history(area, gens):
                 gen += nsteps * step
                 zoomed = True
             history[frozen] = gen
-    return area.resource_value()
+    return area
 
 if __name__ == "__main__":
     area = Area()
     with open("day18_input.txt") as f:
         area.read(f)
-    ans = run_with_history(area, 1_000_000_000)
+    ans = run_with_history(area, 1_000_000_000).resource_value()
     print(f"Part 2: the resource value after a billion steps is {ans}")
