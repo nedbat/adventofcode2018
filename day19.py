@@ -100,27 +100,46 @@ class Device:
             opname = op.__name__
             operands = " ".join(map(str, inst[1:]))
             comment = ""
-            if op == addi:
+            if op in [addi, muli]:
+                if op == addi:
+                    operator = "+"
+                elif op == muli:
+                    operator = "*"
                 if inst[A] == ipreg and inst[C] == ipreg:
+                    assert op == addi
                     dest = loc + inst[B] + 1
                     comment = f"jump to {dest}"
                 elif inst[A] == inst[C]:
-                    comment = f"r{inst[C]} += {inst[B]}"
+                    comment = f"r{inst[C]} {operator}= {inst[B]}"
                 else:
-                    comment = f"r{inst[C]} = r{inst[A]} + {inst[B]}"
-            elif op == addr:
+                    comment = f"r{inst[C]} = r{inst[A]} {operator} {inst[B]}"
+            elif op in [addr, mulr]:
+                if op == addr:
+                    operator = "+"
+                elif op == mulr:
+                    operator = "*"
                 if inst[B] == inst[C]:
                     inst[B], inst[A] = inst[A], inst[B]
-                if inst[A] == inst[C]:
-                    comment = f"r{inst[C]} += r{inst[B]}"
+                if inst[B] == ipreg:
+                    operand = loc
                 else:
-                    comment = f"r{inst[C]} = r{inst[A]} + r{inst[B]}"
+                    operand = f"r{inst[B]}"
+                if inst[A] == inst[C]:
+                    comment = f"r{inst[C]} {operator}= {operand}"
+                else:
+                    comment = f"r{inst[C]} = r{inst[A]} {operator} {operand}"
             elif op == seti:
                 if inst[C] == ipreg:
                     dest = inst[A] + 1
                     comment = f"jump to {dest}"
                 else:
                     comment = f"r{inst[C]} = {inst[A]}"
+            elif op == setr:
+                if inst[A] == ipreg:
+                    operand = loc
+                else:
+                    operand = f"r{inst[A]}"
+                comment = f"r{inst[C]} = {operand}"
             comch = "#" if comment else ""
             print(f"{loc:2d}: {opname} {operands:20} {comch} {comment}".rstrip())
 
