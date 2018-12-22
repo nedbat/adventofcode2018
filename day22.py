@@ -131,10 +131,10 @@ class CaveState(State):
 
 def test_search():
     test_cave = Cave(510, 10, 10)
-    time = search(CaveState(test_cave), log=True)
+    time = search(CaveState(test_cave), log=1)
     assert time == 45
 
 if __name__ == "__main__":
     cave = Cave(4080, 14, 785)
-    time = search(CaveState(cave), log=True)
+    time = search(CaveState(cave), log=.1)
     print(f"Part 2: fewest minutes to reach target is {time}")

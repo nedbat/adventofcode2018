@@ -103,9 +103,12 @@ class AStar:
         self.costs[state] = cost
         self.candidates.add(state, cost + guess)
 
-    def search(self, start_state, log=False):
+    def search(self, start_state, log_every=0):
         inf = float('inf')
-        should_log = OnceEvery(seconds=5)
+        if log_every:
+            should_log = OnceEvery(seconds=log_every)
+        else:
+            should_log = None
         self.add_candidate(start_state, 0)
         self.came_from[start_state] = None
         try:
@@ -117,7 +120,7 @@ class AStar:
                 cost = self.costs[best]
                 if best.is_goal():
                     return cost
-                if log and should_log.now():
+                if should_log and should_log.now():
                     print(f"cost {cost}; {len(self.visited):,d} visited, {len(self.candidates):,d} candidates, {best.summary()}")
                 self.visited.add(best)
                 for nstate, ncost in best.next_states(cost):
@@ -128,8 +131,8 @@ class AStar:
                         self.add_candidate(nstate, ncost)
                         self.came_from[nstate] = best
         finally:
-            if log:
-                print(f"{len(self.visited):,d} visited, {len(self.candidates):,d} candidates remaining")
+            if log_every:
+                print(f"At end: {len(self.visited):,d} visited, {len(self.candidates):,d} candidates remaining")
 
 
 def search(start_state, log=False):
