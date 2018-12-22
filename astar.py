@@ -98,9 +98,10 @@ class AStar:
         self.came_from = {}
 
     def add_candidate(self, state, cost):
-        total_cost = cost + state.guess_completion_cost()
+        guess = state.guess_completion_cost()
+        assert guess >= 0
         self.costs[state] = cost
-        self.candidates.add(state, total_cost)
+        self.candidates.add(state, cost + guess)
 
     def search(self, start_state, log=False):
         inf = float('inf')
