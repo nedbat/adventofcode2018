@@ -117,7 +117,7 @@ def parse(regex):
     val = parser.opt()
     return val
 
-def test_input():
+def the_input():
     with open("day20_input.txt") as f:
         return parse(f.read())
 
@@ -142,9 +142,9 @@ def test_longest_path(regex, ans):
     assert longest_path(parse(regex)) == ans
 
 if __name__ == "__main__":
-    ans = longest_path(test_input())
+    ans = longest_path(the_input())
     print(f"Part 1: the shortest path to the farthest room is {ans} doors")
     
-    rooms = visit_rooms(test_input())
+    rooms = visit_rooms(the_input())
     num_1000 = sum(1 for dist in rooms.values() if dist >= 1000)
     print(f"Part 2: there are {num_1000} rooms at least 1000 doors away")
