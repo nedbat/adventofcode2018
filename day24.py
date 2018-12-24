@@ -1,5 +1,6 @@
 # https://adventofcode.com/2018/day/24
 
+import itertools
 import pprint
 import re
 
@@ -161,7 +162,11 @@ def fighting_pairs(attacking, defending):
                 yield (attacker, target)
                 defenders.remove(target)
 
+class Stalemate(Exception):
+    pass
+
 def fight(army1, army2):
+    last = ""
     while army1.groups and army2.groups:
         #print("-"*80)
         # Target selection.
@@ -169,6 +174,11 @@ def fight(army1, army2):
             list(fighting_pairs(army1, army2)) +
             list(fighting_pairs(army2, army1))
             )
+        this = repr(pairs)
+        if this == last:
+            # No progress
+            raise Stalemate()
+        last = this
         # Attack.
         pairs.sort(key=lambda pair: pair[0].initiative, reverse=True)
         for attacker, defender in pairs:
@@ -184,3 +194,27 @@ if __name__ == "__main__":
     winner = fight(*make_armies(INPUT))
     ans = sum(g.units for g in winner.groups)
     print(f"Part 1: army {winner.name} wins with {ans} units")
+
+
+def run_boosted_fight(boost):
+    immune, infection = make_armies(INPUT)
+    for group in immune.groups:
+        group.damage += boost
+    winner = fight(immune, infection)
+    return winner
+
+def part2():
+    for boost in itertools.count():
+        try:
+            winner = run_boosted_fight(boost)
+        except Stalemate:
+            print(f"Boost {boost}: stalemate")
+        else:
+            print(f"Boost {boost}: army {winner.name} wins")
+            if winner.name == "immune":
+                break
+    remaining = sum(g.units for g in winner.groups)
+    print(f"Boost {boost}: army {winner.name} wins with {remaining} units")
+
+if __name__ == "__main__":
+    part2()
